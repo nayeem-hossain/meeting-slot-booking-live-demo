@@ -132,11 +132,16 @@ Completed:
 
 Pending:
 
-- Backend currently returns 500 until required env vars are set in Vercel (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`)
-- Provision production PostgreSQL/Redis and align backend secrets for backend + worker
+- Provision SMTP credentials for notification delivery
 - Deploy worker on always-on public host (non-local)
-- Run live smoke test on deployed URL (login, booking create/cancel, admin/moderator access)
+- Optional: run admin/moderator UI-role smoke checks with seeded role accounts
 - Record final demo URL and handoff notes for client presentation
+
+Verified live checks:
+
+- Backend health endpoint returns 200 (`/health`)
+- Rooms API returns 200 (`/api/rooms`)
+- Production smoke flow succeeded: register -> booking create -> booking cancel
 
 ## Recommended next step
 

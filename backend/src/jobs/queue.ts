@@ -71,15 +71,15 @@ export async function enqueueBookingReminders(payload: { to: string; bookingId: 
 
     await enqueueEmailJob(reminder.name, payload, {
       delay,
-      jobId: `${reminder.name}:${payload.bookingId}`
+      jobId: `${reminder.name}-${payload.bookingId}`
     });
   }
 }
 
 export async function cancelBookingReminders(bookingId: string): Promise<void> {
   const reminderJobIds = [
-    `booking-reminder-24h:${bookingId}`,
-    `booking-reminder-1h:${bookingId}`
+    `booking-reminder-24h-${bookingId}`,
+    `booking-reminder-1h-${bookingId}`
   ];
 
   for (const jobId of reminderJobIds) {
