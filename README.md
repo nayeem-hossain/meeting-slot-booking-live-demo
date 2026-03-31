@@ -51,6 +51,8 @@ cd frontend
 - `POST /api/auth/logout`
 - `GET /api/rooms`
 - `POST /api/rooms` (Admin)
+- `PUT /api/rooms/:id` (Admin)
+- `DELETE /api/rooms/:id` (Admin)
 - `GET /api/bookings`
 - `GET /api/bookings/availability?roomId=<id>&date=YYYY-MM-DD`
 - `POST /api/bookings`
