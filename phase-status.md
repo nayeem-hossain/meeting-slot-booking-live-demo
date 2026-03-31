@@ -117,6 +117,8 @@ Completed:
 - Live demo URL (frontend): `https://frontend-ruby-seven-nd52m1yfqs.vercel.app`
 - GitHub repository created and published: `https://github.com/nayeem-hossain/meeting-slot-booking-live-demo`
 - Vercel project connected to GitHub repository for automatic deployments
+- Vercel project root directory fixed to `frontend` for monorepo Git deployments
+- Git-connected production redeploy successful after root-directory fix
 
 Pending:
 
