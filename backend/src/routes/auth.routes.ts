@@ -2,7 +2,9 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { Role } from "../generated/prisma/index.js";
 import { z } from "zod";
+import { env } from "../config/env.js";
 import { prisma } from "../db/prisma.js";
+import { createRateLimiter } from "../middleware/rate-limit.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
 
 const registerSchema = z.object({
@@ -22,7 +24,22 @@ const refreshSchema = z.object({
 
 export const authRouter = Router();
 
-authRouter.post("/register", async (req, res, next) => {
+const registerLimiter = createRateLimiter({
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
+  max: env.AUTH_RATE_LIMIT_MAX_REGISTER
+});
+
+const loginLimiter = createRateLimiter({
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
+  max: env.AUTH_RATE_LIMIT_MAX_LOGIN
+});
+
+const refreshLimiter = createRateLimiter({
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
+  max: env.AUTH_RATE_LIMIT_MAX_REFRESH
+});
+
+authRouter.post("/register", registerLimiter, async (req, res, next) => {
   try {
     const payload = registerSchema.parse(req.body);
 
@@ -64,7 +81,7 @@ authRouter.post("/register", async (req, res, next) => {
   }
 });
 
-authRouter.post("/login", async (req, res, next) => {
+authRouter.post("/login", loginLimiter, async (req, res, next) => {
   try {
     const payload = loginSchema.parse(req.body);
 
@@ -100,17 +117,29 @@ authRouter.post("/login", async (req, res, next) => {
   }
 });
 
-authRouter.post("/refresh", async (req, res, next) => {
+authRouter.post("/refresh", refreshLimiter, async (req, res, next) => {
   try {
     const payload = refreshSchema.parse(req.body);
-    const dbToken = await prisma.refreshToken.findUnique({ where: { token: payload.refreshToken } });
-
-    if (!dbToken || dbToken.expiresAt <= new Date()) {
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(payload.refreshToken);
+    } catch {
       return res.status(401).json({ message: "Invalid refresh token" });
     }
 
-    const decoded = verifyRefreshToken(payload.refreshToken);
     if (decoded.type !== "refresh") {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    const dbToken = await prisma.refreshToken.findUnique({ where: { token: payload.refreshToken } });
+
+    if (!dbToken) {
+      await prisma.refreshToken.deleteMany({ where: { userId: decoded.sub } });
+      return res.status(401).json({ message: "Refresh token reuse detected. Please login again." });
+    }
+
+    if (dbToken.expiresAt <= new Date()) {
+      await prisma.refreshToken.deleteMany({ where: { id: dbToken.id } });
       return res.status(401).json({ message: "Invalid refresh token" });
     }
 
@@ -139,7 +168,7 @@ authRouter.post("/refresh", async (req, res, next) => {
   }
 });
 
-authRouter.post("/logout", async (req, res, next) => {
+authRouter.post("/logout", refreshLimiter, async (req, res, next) => {
   try {
     const payload = refreshSchema.parse(req.body);
     await prisma.refreshToken.deleteMany({ where: { token: payload.refreshToken } });

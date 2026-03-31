@@ -64,12 +64,13 @@ cd frontend
 - overlap check (`start < existing.end && end > existing.start`)
 - pricing by quarter-hour blocks (`hourlyRate * blocks / 4`)
 - role model: `ADMIN`, `MODERATOR`, `USER`
+- auth endpoint rate limiting (register/login/refresh/logout)
+- refresh-token reuse detection with token-family revocation
 
 ## Next implementation targets
 
 - transactional overlap prevention with stricter DB-level constraints
 - moderator/admin dashboards and CRUD completion
-- JWT hardening (rate limit and refresh-token reuse detection)
 - worker dead-letter/retry strategy and richer email templates
 
 ## Vercel live demo deployment runbook
