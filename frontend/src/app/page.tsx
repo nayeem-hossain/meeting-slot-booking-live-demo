@@ -17,9 +17,9 @@ const highlights = [
     icon: "LIVE"
   },
   {
-    title: "Role-protected operations",
-    detail: "Admin and moderation routes are protected and not exposed in public navigation.",
-    icon: "RBAC"
+    title: "Operational reliability",
+    detail: "Designed for daily team workflows with clear access patterns and stable booking actions.",
+    icon: "OPS"
   }
 ];
 
@@ -45,7 +45,7 @@ const howToUse = [
 const guideNotes = [
   "All times are shown in UTC in the booking grid.",
   "Slot conflicts return immediate guidance and refresh availability.",
-  "Role-protected pages are accessible only to authorized users via direct route."
+  "Use room features and capacity details to pick the best space for each meeting."
 ];
 
 export default function HomePage() {

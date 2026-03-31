@@ -9,6 +9,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login, register, isAuthenticated, loading } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [managementMode, setManagementMode] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,7 +56,9 @@ export default function LoginPage() {
     <section className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
       <h2 style={{ marginTop: 0 }}>{mode === "login" ? "Sign In" : "Create Account"}</h2>
       <p style={{ color: "var(--muted)" }}>
-        Use your account to create and manage booking slots.
+        {managementMode
+          ? "Management access mode: use authorized moderator/admin credentials."
+          : "Use your account to create and manage booking slots."}
       </p>
 
       <form onSubmit={handleSubmit} className="formGrid">
@@ -106,8 +109,27 @@ export default function LoginPage() {
       <div style={{ marginTop: 16 }}>
         <button
           type="button"
+          className="button buttonGhost"
+          onClick={() => {
+            setMode("login");
+            setManagementMode((current) => !current);
+            setError(null);
+          }}
+          disabled={submitting}
+          style={{ marginRight: 8 }}
+        >
+          Management Login
+        </button>
+        <button
+          type="button"
           className="button buttonSecondary"
-          onClick={() => setMode(mode === "login" ? "register" : "login")}
+          onClick={() => {
+            const nextMode = mode === "login" ? "register" : "login";
+            setMode(nextMode);
+            if (nextMode === "register") {
+              setManagementMode(false);
+            }
+          }}
           disabled={submitting}
         >
           {mode === "login" ? "Need an account? Register" : "Already have an account? Sign in"}

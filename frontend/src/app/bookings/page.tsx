@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
 import { io } from "socket.io-client";
 import { useAuth } from "../../components/auth-provider";
 import { ApiError, getApiBaseUrl } from "../../lib/api-client";
@@ -10,6 +12,10 @@ import { Booking, BusyInterval, Room } from "../../lib/types";
 
 const MIN_BLOCKS = 1;
 const MAX_BLOCKS = 16;
+
+function toIsoDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
 
 function isOverlapping(start: Date, end: Date, interval: { startTime: string; endTime: string }): boolean {
   const bookingStart = new Date(interval.startTime);
@@ -154,6 +160,11 @@ export default function BookingsPage() {
     [rooms, selectedRoomId]
   );
 
+  const selectedCalendarDate = useMemo(() => {
+    const [year, month, day] = selectedDate.split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+  }, [selectedDate]);
+
   async function handleCreateBooking(startTimeIso: string) {
     if (!selectedRoomId || !isAuthenticated) {
       return;
@@ -272,15 +283,22 @@ export default function BookingsPage() {
 
           <label className="fieldLabel">
             Date (UTC)
-            <input
-              className="input"
-              type="date"
-              value={selectedDate}
-              onChange={(event) => {
-                setSelectedDate(event.target.value);
-                setConflictNotice(null);
-              }}
-            />
+            <div className="calendarPanel">
+              <DayPicker
+                mode="single"
+                selected={selectedCalendarDate}
+                onSelect={(date) => {
+                  if (!date) {
+                    return;
+                  }
+
+                  setSelectedDate(toIsoDate(date));
+                  setConflictNotice(null);
+                }}
+                weekStartsOn={1}
+                disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
+              />
+            </div>
           </label>
 
           <label className="fieldLabel">
