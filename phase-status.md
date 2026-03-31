@@ -106,7 +106,7 @@ Pending:
 
 ## Phase 6 - Vercel live demo deployment
 
-Status: In Progress
+Status: Completed (except worker hosting)
 
 Completed:
 
@@ -132,16 +132,18 @@ Completed:
 
 Pending:
 
-- Provision SMTP credentials for notification delivery
 - Deploy worker on always-on public host (non-local)
-- Optional: run admin/moderator UI-role smoke checks with seeded role accounts
-- Record final demo URL and handoff notes for client presentation
 
 Verified live checks:
 
 - Backend health endpoint returns 200 (`/health`)
 - Rooms API returns 200 (`/api/rooms`)
 - Production smoke flow succeeded: register -> booking create -> booking cancel
+- UI smoke checks passed on production frontend:
+	- Home route loads (`/`)
+	- Unauthenticated guard works (`/bookings`, `/admin`, `/moderator` show Sign in required)
+	- Authenticated USER route flow works (`/bookings` accessible after register/login)
+	- Role guard works for USER (`/admin` and `/moderator` show Access denied)
 
 ## Recommended next step
 
@@ -150,7 +152,7 @@ Focus on live-demo readiness first, then operational hardening:
 1. Set Vercel production env var (`NEXT_PUBLIC_API_BASE_URL`) to deployed backend URL.
 2. Deploy backend Vercel project + managed Postgres/Redis.
 3. Deploy worker on always-on host with same data/message infra.
-4. Run full end-to-end smoke tests.
+4. Configure SMTP credentials for production notification delivery.
 
 ## Update rule (every milestone)
 
