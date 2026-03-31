@@ -132,6 +132,7 @@ Completed:
 
 Pending:
 
+- Backend currently returns 500 until required env vars are set in Vercel (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`)
 - Provision production PostgreSQL/Redis and align backend secrets for backend + worker
 - Deploy worker on always-on public host (non-local)
 - Run live smoke test on deployed URL (login, booking create/cancel, admin/moderator access)
