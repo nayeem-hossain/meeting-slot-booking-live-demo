@@ -4,8 +4,8 @@ Last updated: 2026-04-01
 
 Active workstream (current):
 
-- Complete worker hosting for production notifications
-- Finalize SMTP-backed delivery path and worker runtime verification
+- Demo-ready stability and handoff documentation
+- Defer email worker hosting until post-demo hardening
 
 ## Phase 1 - Setup Express server and PostgreSQL schema
 
@@ -86,7 +86,7 @@ Pending:
 
 ## Phase 5 - Worker notifications (BullMQ/Cron + email)
 
-Status: In Progress
+Status: Deferred (demo mode)
 
 Completed:
 
@@ -101,13 +101,13 @@ Completed:
 
 Pending:
 
-- Deploy worker on always-on public host (Render/Railway/Fly/VM)
-- Set SMTP production credentials on worker host and verify live email delivery
+- Deploy worker on always-on public host (Render/Railway/Fly/VM) after demo
+- Set SMTP production credentials on worker host and verify live email delivery after demo
 - Email template improvement and delivery observability
 
 ## Phase 6 - Vercel live demo deployment
 
-Status: Completed (except worker hosting)
+Status: Completed
 
 Completed:
 
@@ -133,7 +133,7 @@ Completed:
 
 Pending:
 
-- Deploy worker on always-on public host (non-local)
+- None (worker hosting intentionally deferred for demo mode)
 
 Verified live checks:
 
@@ -152,8 +152,8 @@ Focus on live-demo readiness first, then operational hardening:
 
 1. Set Vercel production env var (`NEXT_PUBLIC_API_BASE_URL`) to deployed backend URL.
 2. Deploy backend Vercel project + managed Postgres/Redis.
-3. Deploy worker on always-on host with same data/message infra.
-4. Configure SMTP credentials for production notification delivery.
+3. Execute live demo with current auth/booking/role flows.
+4. After demo, deploy worker on always-on host and configure SMTP.
 
 ## Update rule (every milestone)
 

@@ -111,7 +111,7 @@ Use Vercel backend deployment for REST API hosting, then run the worker on a sep
 - `REDIS_URL=<managed-redis-url>`
 - `JWT_ACCESS_SECRET=<secure-random-secret>`
 - `JWT_REFRESH_SECRET=<secure-random-secret>`
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (optional for demo mode)
 
 4. Deploy backend and copy live backend URL.
 5. In frontend Vercel project, set `NEXT_PUBLIC_API_BASE_URL` to backend live URL and redeploy.
@@ -119,6 +119,16 @@ Use Vercel backend deployment for REST API hosting, then run the worker on a sep
 ### Worker host (separate from Vercel Functions)
 
 Deploy worker process (`npm run worker:start`) on an always-on host (Railway/Render/Fly.io/VM) with same `DATABASE_URL`/`REDIS_URL`/SMTP vars.
+
+#### Demo mode (no email notifications)
+
+For live demos where email is not required, you can skip SMTP and worker hosting:
+
+1. Keep backend API deployed on Vercel.
+2. Keep frontend API base URL pointing to backend.
+3. Do not deploy worker yet.
+
+In this mode, auth/rooms/bookings flows continue to work. Email notification jobs are simply not processed until worker + SMTP are enabled.
 
 #### Worker deployment quickstart (recommended next step)
 
@@ -166,4 +176,4 @@ After both deployments are live, verify:
 - Booking create/cancel works and UI updates.
 - Admin and Moderator protected pages are accessible by role.
 - REST API calls succeed against deployed backend URL.
-- Queue jobs are processed by external worker host.
+- Queue jobs are processed by external worker host (only when worker is enabled).
