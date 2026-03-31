@@ -43,11 +43,11 @@ Completed:
 - Home page redesign with clearer value narrative and direct role-based actions
 - Admin console implementation: KPI summary, room creation form, searchable booking overview
 - Moderator console implementation: moderation queue filters and booking cancellation action
+- Admin room inventory management now supports create/update/delete workflows
 
 Pending:
 
 - Build richer update/reschedule booking UX with validation feedback
-- Extend room management UX to update/delete after backend route support is added
 
 ## Phase 3 - JWT authentication and RBAC
 
@@ -62,6 +62,7 @@ Completed:
 - Logout revoke endpoint (`/api/auth/logout`)
 - Frontend token/session integration with refresh retry path
 - Frontend route-level role guards (Admin/Moderator/User)
+- Admin-protected room update/delete backend endpoints (`PUT /api/rooms/:id`, `DELETE /api/rooms/:id`)
 
 Pending:
 
