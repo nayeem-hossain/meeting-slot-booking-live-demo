@@ -56,6 +56,13 @@ export interface CreateRoomPayload {
   hourlyRate: number;
 }
 
+export interface UpdateRoomPayload {
+  name?: string;
+  capacity?: number;
+  features?: string[];
+  hourlyRate?: number;
+}
+
 export interface BusyInterval {
   startTime: string;
   endTime: string;

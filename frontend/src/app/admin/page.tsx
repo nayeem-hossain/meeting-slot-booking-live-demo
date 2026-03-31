@@ -28,14 +28,16 @@ function toFeatureList(raw: string): string[] {
 }
 
 export default function AdminPage() {
-  const { getRooms, getBookings, createRoom } = useAuth();
+  const { getRooms, getBookings, createRoom, updateRoom, deleteRoom } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "CANCELLED">("ALL");
   const [roomForm, setRoomForm] = useState<RoomFormState>(initialRoomForm);
+  const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-  const [creating, setCreating] = useState(false);
+  const [savingRoom, setSavingRoom] = useState(false);
+  const [deletingRoomId, setDeletingRoomId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,21 +153,35 @@ export default function AdminPage() {
       return;
     }
 
-    setCreating(true);
+    setSavingRoom(true);
     setError(null);
     setMessage(null);
 
     try {
-      const created = await createRoom({
-        name: roomForm.name.trim(),
-        capacity,
-        hourlyRate,
-        features
-      });
+      if (editingRoomId) {
+        const updated = await updateRoom(editingRoomId, {
+          name: roomForm.name.trim(),
+          capacity,
+          hourlyRate,
+          features
+        });
 
-      setRooms((current) => [created, ...current]);
+        setRooms((current) => current.map((room) => (room.id === updated.id ? updated : room)));
+        setMessage(`Room \"${updated.name}\" updated successfully.`);
+      } else {
+        const created = await createRoom({
+          name: roomForm.name.trim(),
+          capacity,
+          hourlyRate,
+          features
+        });
+
+        setRooms((current) => [created, ...current]);
+        setMessage(`Room \"${created.name}\" created successfully.`);
+      }
+
       setRoomForm(initialRoomForm);
-      setMessage(`Room \"${created.name}\" created successfully.`);
+      setEditingRoomId(null);
     } catch (createError) {
       if (createError instanceof ApiError) {
         setError(createError.message);
@@ -175,7 +191,52 @@ export default function AdminPage() {
         setError("Unable to create room.");
       }
     } finally {
-      setCreating(false);
+      setSavingRoom(false);
+    }
+  }
+
+  function handleEditRoom(room: Room) {
+    setEditingRoomId(room.id);
+    setRoomForm({
+      name: room.name,
+      capacity: String(room.capacity),
+      hourlyRate: String(room.hourlyRate),
+      features: room.features.join(", ")
+    });
+    setError(null);
+    setMessage(`Editing room \"${room.name}\".`);
+  }
+
+  async function handleDeleteRoom(room: Room) {
+    const shouldDelete = window.confirm(`Delete room \"${room.name}\"? This action cannot be undone.`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    setDeletingRoomId(room.id);
+    setError(null);
+    setMessage(null);
+
+    try {
+      await deleteRoom(room.id);
+      setRooms((current) => current.filter((item) => item.id !== room.id));
+
+      if (editingRoomId === room.id) {
+        setEditingRoomId(null);
+        setRoomForm(initialRoomForm);
+      }
+
+      setMessage(`Room \"${room.name}\" deleted successfully.`);
+    } catch (deleteError) {
+      if (deleteError instanceof ApiError) {
+        setError(deleteError.message);
+      } else if (deleteError instanceof Error) {
+        setError(deleteError.message);
+      } else {
+        setError("Unable to delete room.");
+      }
+    } finally {
+      setDeletingRoomId(null);
     }
   }
 
@@ -221,8 +282,12 @@ export default function AdminPage() {
         </section>
 
         <section className="card">
-          <h3>Create Room</h3>
-          <p className="helperText">Add room inventory with pricing and feature labels.</p>
+          <h3>{editingRoomId ? "Edit Room" : "Create Room"}</h3>
+          <p className="helperText">
+            {editingRoomId
+              ? "Update room inventory, pricing, and feature labels."
+              : "Add room inventory with pricing and feature labels."}
+          </p>
 
           <form className="formGrid" onSubmit={handleCreateRoom}>
             <div className="filterGrid formGridColumns">
@@ -279,26 +344,86 @@ export default function AdminPage() {
             </div>
 
             <div className="inlineActions">
-              <button type="submit" className="button" disabled={creating}>
-                {creating ? "Creating..." : "Create Room"}
+              <button type="submit" className="button" disabled={savingRoom}>
+                {savingRoom ? "Saving..." : editingRoomId ? "Update Room" : "Create Room"}
               </button>
               <button
                 type="button"
                 className="button buttonGhost"
                 onClick={() => {
                   setRoomForm(initialRoomForm);
+                  setEditingRoomId(null);
                   setMessage(null);
                   setError(null);
                 }}
-                disabled={creating}
+                disabled={savingRoom}
               >
-                Reset
+                {editingRoomId ? "Cancel Edit" : "Reset"}
               </button>
             </div>
           </form>
 
           {error && <p className="errorText">{error}</p>}
           {message && <p className="successText">{message}</p>}
+        </section>
+
+        <section className="card">
+          <div className="sectionHeader">
+            <div>
+              <h3>Room Inventory</h3>
+              <p className="helperText">Manage room metadata directly from the admin console.</p>
+            </div>
+          </div>
+
+          {rooms.length === 0 ? (
+            <div className="emptyState">No rooms found.</div>
+          ) : (
+            <div className="tableWrap">
+              <table className="dataTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Capacity</th>
+                    <th>Hourly Rate</th>
+                    <th>Features</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rooms.map((room) => (
+                    <tr key={room.id}>
+                      <td>{room.name}</td>
+                      <td>{room.capacity}</td>
+                      <td>${room.hourlyRate.toFixed(2)}</td>
+                      <td>{room.features.join(", ") || "-"}</td>
+                      <td>
+                        <div className="inlineActions">
+                          <button
+                            type="button"
+                            className="button buttonSecondary"
+                            onClick={() => handleEditRoom(room)}
+                            disabled={deletingRoomId === room.id}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="button buttonGhost"
+                            onClick={() => {
+                              void handleDeleteRoom(room);
+                            }}
+                            disabled={deletingRoomId === room.id}
+                          >
+                            {deletingRoomId === room.id ? "Deleting..." : "Delete"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         <section className="card">

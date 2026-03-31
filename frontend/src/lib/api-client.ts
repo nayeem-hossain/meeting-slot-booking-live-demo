@@ -3,6 +3,7 @@ import {
   AuthResponse,
   Booking,
   CreateRoomPayload,
+  UpdateRoomPayload,
   CreateBookingPayload,
   RefreshResponse,
   Room
@@ -20,7 +21,7 @@ export class ApiError extends Error {
 }
 
 interface RequestOptions {
-  method?: "GET" | "POST" | "PATCH";
+  method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
   token?: string;
 }
@@ -119,6 +120,21 @@ export function createRoomRequest(token: string, payload: CreateRoomPayload): Pr
     method: "POST",
     token,
     body: payload
+  });
+}
+
+export function updateRoomRequest(token: string, roomId: string, payload: UpdateRoomPayload): Promise<Room> {
+  return request<Room>(`/api/rooms/${roomId}`, {
+    method: "PUT",
+    token,
+    body: payload
+  });
+}
+
+export function deleteRoomRequest(token: string, roomId: string): Promise<void> {
+  return request<void>(`/api/rooms/${roomId}`, {
+    method: "DELETE",
+    token
   });
 }
 

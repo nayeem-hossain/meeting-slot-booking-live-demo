@@ -14,12 +14,14 @@ import {
   ApiError,
   cancelBookingRequest,
   createRoomRequest,
+  deleteRoomRequest,
   createBookingRequest,
   getBookingsRequest,
   getRoomsRequest,
   loginRequest,
   logoutRequest,
   refreshRequest,
+  updateRoomRequest,
   registerRequest
 } from "../lib/api-client";
 import {
@@ -30,6 +32,7 @@ import {
   CreateRoomPayload,
   CreateBookingPayload,
   Room,
+  UpdateRoomPayload,
   SessionTokens
 } from "../lib/types";
 
@@ -51,6 +54,8 @@ interface AuthContextValue {
   createBooking: (payload: CreateBookingPayload) => Promise<Booking>;
   cancelBooking: (bookingId: string) => Promise<Booking>;
   createRoom: (payload: CreateRoomPayload) => Promise<Room>;
+  updateRoom: (roomId: string, payload: UpdateRoomPayload) => Promise<Room>;
+  deleteRoom: (roomId: string) => Promise<void>;
 }
 
 const STORAGE_KEY = "meeting-slot-session";
@@ -170,7 +175,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getAvailability: (roomId, date) => withAuth((token) => getAvailabilityRequest(token, roomId, date)),
     createBooking: (payload) => withAuth((token) => createBookingRequest(token, payload)),
     cancelBooking: (bookingId) => withAuth((token) => cancelBookingRequest(token, bookingId)),
-    createRoom: (payload) => withAuth((token) => createRoomRequest(token, payload))
+    createRoom: (payload) => withAuth((token) => createRoomRequest(token, payload)),
+    updateRoom: (roomId, payload) => withAuth((token) => updateRoomRequest(token, roomId, payload)),
+    deleteRoom: (roomId) => withAuth((token) => deleteRoomRequest(token, roomId))
   }), [session, loading, login, register, logout, withAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
