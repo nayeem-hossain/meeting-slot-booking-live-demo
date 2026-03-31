@@ -14,7 +14,10 @@ const MIN_BLOCKS = 1;
 const MAX_BLOCKS = 16;
 
 function toIsoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function isOverlapping(start: Date, end: Date, interval: { startTime: string; endTime: string }): boolean {
@@ -39,7 +42,7 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [busyIntervals, setBusyIntervals] = useState<BusyInterval[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState("");
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [selectedDate, setSelectedDate] = useState(() => toIsoDate(new Date()));
   const [blockCount, setBlockCount] = useState(4);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -152,7 +155,7 @@ export default function BookingsPage() {
 
   const slots = useMemo(() => {
     const [year, month, day] = selectedDate.split("-").map(Number);
-    return generateDaySlots(new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0))).slice(28, 80);
+    return generateDaySlots(new Date(year, month - 1, day, 0, 0, 0, 0)).slice(28, 80);
   }, [selectedDate]);
 
   const selectedRoom = useMemo(
@@ -162,7 +165,7 @@ export default function BookingsPage() {
 
   const selectedCalendarDate = useMemo(() => {
     const [year, month, day] = selectedDate.split("-").map(Number);
-    return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
   }, [selectedDate]);
 
   async function handleCreateBooking(startTimeIso: string) {
