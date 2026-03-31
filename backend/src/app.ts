@@ -10,10 +10,11 @@ import { opsRouter } from "./routes/ops.routes.js";
 import { roomRouter } from "./routes/rooms.routes.js";
 
 export const app = express();
+const helmetFactory = helmet as unknown as () => ReturnType<typeof express.json>;
 
 app.set("trust proxy", 1);
 
-app.use(helmet());
+app.use(helmetFactory());
 app.use(cors({
   origin: (origin, callback) => {
     if (isAllowedOrigin(origin)) {

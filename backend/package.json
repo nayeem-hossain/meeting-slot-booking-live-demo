@@ -7,9 +7,11 @@
     "dev": "tsx watch src/server.ts",
     "worker:dev": "tsx watch src/jobs/worker.ts",
     "build": "tsc -p tsconfig.json",
+    "vercel-build": "npm run prisma:generate:vercel && npm run build",
     "start": "node dist/server.js",
     "worker:start": "node dist/jobs/worker.js",
     "prisma:generate": "prisma generate --schema ../database/prisma/schema.prisma",
+    "prisma:generate:vercel": "prisma generate --schema prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema ../database/prisma/schema.prisma",
     "prisma:seed": "tsx ../database/prisma/seed.ts"
   },

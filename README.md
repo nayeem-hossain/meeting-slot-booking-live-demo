@@ -88,9 +88,20 @@ cd frontend
 
 4. Trigger deployment and verify the Vercel URL loads.
 
-### Backend (public host)
+### Backend (Vercel Functions supported)
 
-Deploy backend separately (Railway/Render/Fly.io/etc.) and set:
+This backend can be deployed on Vercel as an Express API function.
+
+Important Vercel platform constraints for this codebase:
+
+- Vercel Functions do not support acting as a WebSocket server (`socket.io` server mode is not available).
+- BullMQ worker is not suitable inside request/response serverless functions.
+
+Use Vercel backend deployment for REST API hosting, then run the worker on a separate always-on host.
+
+1. Create a second Vercel project from this repository with root directory set to `backend`.
+2. Ensure `backend/vercel.json` and `backend/api/index.ts` are present (already included in this repo).
+3. Set production environment variables in the backend Vercel project:
 
 - `NODE_ENV=production`
 - `CLIENT_ORIGIN=https://<your-frontend>.vercel.app`
@@ -102,6 +113,13 @@ Deploy backend separately (Railway/Render/Fly.io/etc.) and set:
 - `JWT_REFRESH_SECRET=<secure-random-secret>`
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
 
+4. Deploy backend and copy live backend URL.
+5. In frontend Vercel project, set `NEXT_PUBLIC_API_BASE_URL` to backend live URL and redeploy.
+
+### Worker host (separate from Vercel Functions)
+
+Deploy worker process (`npm run worker:start`) on an always-on host (Railway/Render/Fly.io/VM) with same `DATABASE_URL`/`REDIS_URL`/SMTP vars.
+
 ### Smoke test checklist
 
 After both deployments are live, verify:
@@ -110,4 +128,5 @@ After both deployments are live, verify:
 - Room list loads from backend API.
 - Booking create/cancel works and UI updates.
 - Admin and Moderator protected pages are accessible by role.
-- Socket availability updates arrive on bookings page.
+- REST API calls succeed against deployed backend URL.
+- Queue jobs are processed by external worker host.

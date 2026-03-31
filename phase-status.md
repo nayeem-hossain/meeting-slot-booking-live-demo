@@ -6,8 +6,8 @@ Active workstream (current):
 
 - Complete backend/public-infra wiring for Vercel live demo
 - Extend admin operations from create/list to full CRUD as backend endpoints mature
-- Verify DB migration execution in local runtime
-- Improve worker email templates and delivery observability
+- Verify DB migration execution in production runtime
+- Split API hosting vs worker hosting for non-local production deployment
 
 ## Phase 1 - Setup Express server and PostgreSQL schema
 
@@ -123,12 +123,17 @@ Completed:
 - Vercel project connected to GitHub repository for automatic deployments
 - Vercel project root directory fixed to `frontend` for monorepo Git deployments
 - Git-connected production redeploy successful after root-directory fix
+- Vercel backend feasibility verified: Node/Express REST API is supported on Vercel Functions
+- Vercel backend constraint verified: WebSocket server mode is not supported for Functions
+- Backend Vercel adapter added (`backend/api/index.ts`, `backend/vercel.json`)
+- Backend Vercel project deployed successfully
+- Live backend URL (API host): `https://backend-zeta-one-15.vercel.app`
+- Frontend Vercel production env var `NEXT_PUBLIC_API_BASE_URL` created and pointed to backend URL
 
 Pending:
 
-- Set production env vars in Vercel (`NEXT_PUBLIC_API_BASE_URL`)
-- Deploy backend to a public host and enable CORS for Vercel frontend origin
-- Provision production PostgreSQL/Redis and align backend secrets
+- Provision production PostgreSQL/Redis and align backend secrets for backend + worker
+- Deploy worker on always-on public host (non-local)
 - Run live smoke test on deployed URL (login, booking create/cancel, admin/moderator access)
 - Record final demo URL and handoff notes for client presentation
 
@@ -137,9 +142,9 @@ Pending:
 Focus on live-demo readiness first, then operational hardening:
 
 1. Set Vercel production env var (`NEXT_PUBLIC_API_BASE_URL`) to deployed backend URL.
-2. Deploy backend + managed Postgres/Redis, then run full end-to-end smoke tests.
-3. Add frontend admin queue-health view using `GET /api/ops/queues`.
-4. Improve reminder email templates and delivery observability.
+2. Deploy backend Vercel project + managed Postgres/Redis.
+3. Deploy worker on always-on host with same data/message infra.
+4. Run full end-to-end smoke tests.
 
 ## Update rule (every milestone)
 
