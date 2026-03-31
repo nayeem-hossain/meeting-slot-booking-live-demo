@@ -7,7 +7,7 @@ Active workstream (current):
 - Complete backend/public-infra wiring for Vercel live demo
 - Extend admin operations from create/list to full CRUD as backend endpoints mature
 - Verify DB migration execution in local runtime
-- Add security and worker reliability hardening
+- Add worker reliability hardening
 
 ## Phase 1 - Setup Express server and PostgreSQL schema
 
@@ -51,7 +51,7 @@ Pending:
 
 ## Phase 3 - JWT authentication and RBAC
 
-Status: In Progress
+Status: Completed
 
 Completed:
 
@@ -63,10 +63,12 @@ Completed:
 - Frontend token/session integration with refresh retry path
 - Frontend route-level role guards (Admin/Moderator/User)
 - Admin-protected room update/delete backend endpoints (`PUT /api/rooms/:id`, `DELETE /api/rooms/:id`)
+- Auth endpoint rate limiting (`/register`, `/login`, `/refresh`, `/logout`)
+- Refresh-token reuse detection with user token-family revocation
 
 Pending:
 
-- Optional security hardening (rate limit, token reuse detection)
+- None
 
 ## Phase 4 - Socket.io live availability updates
 
@@ -136,8 +138,7 @@ Focus on live-demo readiness first, then operational hardening:
 1. Set Vercel production env var (`NEXT_PUBLIC_API_BASE_URL`) to deployed backend URL.
 2. Deploy backend + managed Postgres/Redis, then run full end-to-end smoke tests.
 3. Add backend room update/delete endpoints, then expose full Admin CRUD UI.
-4. Add JWT hardening (rate limiting + refresh-token reuse detection).
-5. Add dead-letter/retry policy and richer reminder email templates.
+4. Add dead-letter/retry policy and richer reminder email templates.
 
 ## Update rule (every milestone)
 
