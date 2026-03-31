@@ -7,7 +7,7 @@ Active workstream (current):
 - Complete backend/public-infra wiring for Vercel live demo
 - Extend admin operations from create/list to full CRUD as backend endpoints mature
 - Verify DB migration execution in local runtime
-- Add worker reliability hardening
+- Improve worker email templates and delivery observability
 
 ## Phase 1 - Setup Express server and PostgreSQL schema
 
@@ -97,10 +97,11 @@ Completed:
 - Booking confirmation/cancellation job enqueue from booking routes
 - Delayed reminder scheduling (24h/1h) and cancellation on booking cancel
 - Worker completion/failure observability logs
+- Dead-letter queue capture for jobs that exhaust retry attempts
+- Admin queue health monitoring endpoint (`GET /api/ops/queues`)
 
 Pending:
 
-- Retry/dead-letter monitoring strategy
 - Email template improvement and delivery observability
 
 ## Phase 6 - Vercel live demo deployment
@@ -137,8 +138,8 @@ Focus on live-demo readiness first, then operational hardening:
 
 1. Set Vercel production env var (`NEXT_PUBLIC_API_BASE_URL`) to deployed backend URL.
 2. Deploy backend + managed Postgres/Redis, then run full end-to-end smoke tests.
-3. Add backend room update/delete endpoints, then expose full Admin CRUD UI.
-4. Add dead-letter/retry policy and richer reminder email templates.
+3. Add frontend admin queue-health view using `GET /api/ops/queues`.
+4. Improve reminder email templates and delivery observability.
 
 ## Update rule (every milestone)
 
