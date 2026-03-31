@@ -13,6 +13,8 @@ interface RoomFormState {
   features: string;
 }
 
+type BookingLifecycle = "BOOKED" | "COMPLETED" | "CANCELLED";
+
 const initialRoomForm: RoomFormState = {
   name: "",
   capacity: "8",
@@ -27,12 +29,24 @@ function toFeatureList(raw: string): string[] {
     .filter((item) => item.length > 0);
 }
 
+function getBookingLifecycleStatus(booking: Booking): BookingLifecycle {
+  if (booking.status === "CANCELLED") {
+    return "CANCELLED";
+  }
+
+  if (new Date(booking.endTime).getTime() < Date.now()) {
+    return "COMPLETED";
+  }
+
+  return "BOOKED";
+}
+
 export default function AdminPage() {
   const { getRooms, getBookings, createRoom, updateRoom, deleteRoom } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "CANCELLED">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | BookingLifecycle>("ALL");
   const [roomForm, setRoomForm] = useState<RoomFormState>(initialRoomForm);
   const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
@@ -83,7 +97,8 @@ export default function AdminPage() {
   }, [getRooms, getBookings]);
 
   const metrics = useMemo(() => {
-    const activeBookings = bookings.filter((booking) => booking.status === "ACTIVE").length;
+    const bookedBookings = bookings.filter((booking) => getBookingLifecycleStatus(booking) === "BOOKED").length;
+    const completedBookings = bookings.filter((booking) => getBookingLifecycleStatus(booking) === "COMPLETED").length;
     const cancelledBookings = bookings.filter((booking) => booking.status === "CANCELLED").length;
     const totalRevenue = bookings
       .filter((booking) => booking.status === "ACTIVE")
@@ -92,7 +107,8 @@ export default function AdminPage() {
     return {
       roomCount: rooms.length,
       bookingCount: bookings.length,
-      activeBookings,
+      bookedBookings,
+      completedBookings,
       cancelledBookings,
       totalRevenue
     };
@@ -103,7 +119,9 @@ export default function AdminPage() {
 
     return bookings
       .filter((booking) => {
-        if (statusFilter !== "ALL" && booking.status !== statusFilter) {
+        const lifecycle = getBookingLifecycleStatus(booking);
+
+        if (statusFilter !== "ALL" && lifecycle !== statusFilter) {
           return false;
         }
 
@@ -251,6 +269,7 @@ export default function AdminPage() {
                 Monitor operations, onboard new rooms, and review booking activity in one place.
               </p>
             </div>
+            <span className="consoleBadge consoleBadgeAdmin">Admin Control</span>
           </div>
 
           {loadingData ? (
@@ -266,8 +285,12 @@ export default function AdminPage() {
                 <span className="kpiValue">{metrics.bookingCount}</span>
               </article>
               <article className="kpiCard">
-                <span className="kpiLabel">Active Bookings</span>
-                <span className="kpiValue">{metrics.activeBookings}</span>
+                <span className="kpiLabel">Booked</span>
+                <span className="kpiValue">{metrics.bookedBookings}</span>
+              </article>
+              <article className="kpiCard">
+                <span className="kpiLabel">Completed</span>
+                <span className="kpiValue">{metrics.completedBookings}</span>
               </article>
               <article className="kpiCard">
                 <span className="kpiLabel">Cancelled Bookings</span>
@@ -281,7 +304,7 @@ export default function AdminPage() {
           )}
         </section>
 
-        <section className="card">
+        <section className="card adminConsoleCard">
           <h3>{editingRoomId ? "Edit Room" : "Create Room"}</h3>
           <p className="helperText">
             {editingRoomId
@@ -367,7 +390,7 @@ export default function AdminPage() {
           {message && <p className="successText">{message}</p>}
         </section>
 
-        <section className="card">
+        <section className="card adminConsoleCard">
           <div className="sectionHeader">
             <div>
               <h3>Room Inventory</h3>
@@ -426,7 +449,7 @@ export default function AdminPage() {
           )}
         </section>
 
-        <section className="card">
+        <section className="card adminConsoleCard">
           <div className="sectionHeader">
             <div>
               <h3>Bookings Overview</h3>
@@ -442,10 +465,11 @@ export default function AdminPage() {
               <select
                 className="input"
                 value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as "ALL" | "ACTIVE" | "CANCELLED")}
+                onChange={(event) => setStatusFilter(event.target.value as "ALL" | BookingLifecycle)}
               >
-                <option value="ALL">All statuses</option>
-                <option value="ACTIVE">Active</option>
+                <option value="ALL">All lifecycle states</option>
+                <option value="BOOKED">Booked</option>
+                <option value="COMPLETED">Completed</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
@@ -464,26 +488,39 @@ export default function AdminPage() {
                     <th>End</th>
                     <th>Total</th>
                     <th>Status</th>
+                    <th>Lifecycle</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBookings.slice(0, 18).map((booking) => (
-                    <tr key={booking.id}>
-                      <td>{booking.room?.name ?? "Room"}</td>
-                      <td>
-                        <div>{booking.user?.name ?? "Unknown"}</div>
-                        <small className="mutedText">{booking.user?.email ?? ""}</small>
-                      </td>
-                      <td>{new Date(booking.startTime).toLocaleString()}</td>
-                      <td>{new Date(booking.endTime).toLocaleString()}</td>
-                      <td>${booking.totalPrice.toFixed(2)}</td>
-                      <td>
-                        <span className={`tag ${booking.status === "ACTIVE" ? "tagActive" : "tagCancelled"}`}>
-                          {booking.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredBookings.slice(0, 18).map((booking) => {
+                    const lifecycle = getBookingLifecycleStatus(booking);
+                    const lifecycleClass = lifecycle === "BOOKED"
+                      ? "tagBooked"
+                      : lifecycle === "COMPLETED"
+                        ? "tagCompleted"
+                        : "tagCancelled";
+
+                    return (
+                      <tr key={booking.id}>
+                        <td>{booking.room?.name ?? "Room"}</td>
+                        <td>
+                          <div>{booking.user?.name ?? "Unknown"}</div>
+                          <small className="mutedText">{booking.user?.email ?? ""}</small>
+                        </td>
+                        <td>{new Date(booking.startTime).toLocaleString()}</td>
+                        <td>{new Date(booking.endTime).toLocaleString()}</td>
+                        <td>${booking.totalPrice.toFixed(2)}</td>
+                        <td>
+                          <span className={`tag ${booking.status === "ACTIVE" ? "tagActive" : "tagCancelled"}`}>
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`tag ${lifecycleClass}`}>{lifecycle}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

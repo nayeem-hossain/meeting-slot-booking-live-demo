@@ -397,6 +397,43 @@ main {
   gap: 12px;
 }
 
+.bookingComposer {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(320px, 420px);
+  align-items: start;
+  gap: 14px;
+}
+
+.bookingControlStack {
+  display: grid;
+  gap: 12px;
+}
+
+.roomInsightCard {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--panel-soft);
+}
+
+.roomInsightCard h4 {
+  margin: 0 0 8px;
+}
+
+.roomFeatureList {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bookingConfirmPanel {
+  border: 1px solid #b9dbd2;
+  border-radius: 14px;
+  padding: 12px;
+  background: linear-gradient(160deg, #ffffff 0%, #effcf8 100%);
+}
+
 .calendarPanel {
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -540,6 +577,33 @@ main {
   background: #fff;
 }
 
+.bookingStatusGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.statusBoard {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
+  display: grid;
+  gap: 8px;
+}
+
+.statusBoardBooked {
+  background: linear-gradient(170deg, #ffffff 0%, #effbf7 100%);
+}
+
+.statusBoardCompleted {
+  background: linear-gradient(170deg, #ffffff 0%, #eef5ff 100%);
+}
+
+.statusBoardCancelled {
+  background: linear-gradient(170deg, #ffffff 0%, #fff2f2 100%);
+}
+
 .tableWrap {
   overflow: auto;
   border: 1px solid var(--line);
@@ -596,6 +660,56 @@ main {
   border-color: #f4c7c7;
   color: #8e2424;
   background: #fde6e6;
+}
+
+.tagBooked {
+  border-color: #bde6da;
+  color: #135f4a;
+  background: #e1faf2;
+}
+
+.tagCompleted {
+  border-color: #c7d8f3;
+  color: #1f4f83;
+  background: #e6f0ff;
+}
+
+.consoleBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.consoleBadgeAdmin {
+  border: 1px solid #b6d0ef;
+  color: #123b69;
+  background: #e9f2ff;
+}
+
+.consoleBadgeModerator {
+  border: 1px solid #bce0d9;
+  color: #0c5a49;
+  background: #e4f7f2;
+}
+
+.adminConsoleCard {
+  border-color: #bdd2eb;
+  background: linear-gradient(175deg, #ffffff 0%, #f3f8ff 100%);
+}
+
+.moderatorConsoleCard {
+  border-color: #bddfd8;
+  background: linear-gradient(175deg, #ffffff 0%, #effbf8 100%);
+}
+
+.rowReviewed {
+  opacity: 0.74;
 }
 
 .inlineActions {
@@ -705,6 +819,10 @@ ol {
 
   .heroLead {
     font-size: clamp(1.1rem, 6vw, 1.6rem);
+  }
+
+  .bookingComposer {
+    grid-template-columns: 1fr;
   }
 
   .bookingRow {

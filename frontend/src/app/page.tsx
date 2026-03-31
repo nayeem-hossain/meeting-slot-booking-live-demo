@@ -43,7 +43,7 @@ const howToUse = [
 ];
 
 const guideNotes = [
-  "All times are shown in UTC in the booking grid.",
+  "Booking pages show date and time in your local timezone.",
   "Slot conflicts return immediate guidance and refresh availability.",
   "Use room features and capacity details to pick the best space for each meeting."
 ];

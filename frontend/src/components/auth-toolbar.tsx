@@ -25,6 +25,22 @@ export function AuthToolbar() {
       <span className="userChip">
         {user?.name} ({user?.role})
       </span>
+      {(user?.role === "MODERATOR" || user?.role === "ADMIN") && (
+        <Link
+          href="/moderator"
+          className={`button buttonGhost${pathname.startsWith("/moderator") ? " navLinkActive" : ""}`}
+        >
+          Moderator
+        </Link>
+      )}
+      {user?.role === "ADMIN" && (
+        <Link
+          href="/admin"
+          className={`button buttonGhost${pathname.startsWith("/admin") ? " navLinkActive" : ""}`}
+        >
+          Admin
+        </Link>
+      )}
       <button
         type="button"
         onClick={() => {

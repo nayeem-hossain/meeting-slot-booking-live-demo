@@ -6,13 +6,28 @@ import { useAuth } from "../../components/auth-provider";
 import { Booking } from "../../lib/types";
 import { RoleGuard } from "../../components/role-guard";
 
+type BookingLifecycle = "BOOKED" | "COMPLETED" | "CANCELLED";
+
+function getBookingLifecycleStatus(booking: Booking): BookingLifecycle {
+  if (booking.status === "CANCELLED") {
+    return "CANCELLED";
+  }
+
+  if (new Date(booking.endTime).getTime() < Date.now()) {
+    return "COMPLETED";
+  }
+
+  return "BOOKED";
+}
+
 export default function ModeratorPage() {
   const { getBookings, cancelBooking } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "CANCELLED">("ACTIVE");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | BookingLifecycle>("BOOKED");
   const [loadingData, setLoadingData] = useState(true);
   const [busyBookingId, setBusyBookingId] = useState<string | null>(null);
+  const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,13 +68,15 @@ export default function ModeratorPage() {
   }, [getBookings]);
 
   const stats = useMemo(() => {
-    const activeBookings = bookings.filter((booking) => booking.status === "ACTIVE").length;
+    const bookedBookings = bookings.filter((booking) => getBookingLifecycleStatus(booking) === "BOOKED").length;
+    const completedBookings = bookings.filter((booking) => getBookingLifecycleStatus(booking) === "COMPLETED").length;
     const cancelledBookings = bookings.filter((booking) => booking.status === "CANCELLED").length;
     const uniqueRooms = new Set(bookings.map((booking) => booking.roomId)).size;
 
     return {
       total: bookings.length,
-      activeBookings,
+      bookedBookings,
+      completedBookings,
       cancelledBookings,
       uniqueRooms
     };
@@ -70,7 +87,9 @@ export default function ModeratorPage() {
 
     return bookings
       .filter((booking) => {
-        if (statusFilter !== "ALL" && booking.status !== statusFilter) {
+        const lifecycle = getBookingLifecycleStatus(booking);
+
+        if (statusFilter !== "ALL" && lifecycle !== statusFilter) {
           return false;
         }
 
@@ -112,15 +131,25 @@ export default function ModeratorPage() {
     }
   }
 
+  function handleMarkReviewed(bookingId: string) {
+    setReviewedBookingIds((current) => {
+      const next = new Set(current);
+      next.add(bookingId);
+      return next;
+    });
+    setMessage(`Booking ${bookingId.slice(0, 8)}... marked as reviewed.`);
+  }
+
   return (
     <RoleGuard allowRoles={["MODERATOR", "ADMIN"]}>
       <div className="stack">
-        <section className="card">
+        <section className="card moderatorConsoleCard">
           <div className="sectionHeader">
             <div>
               <h2>Moderator Console</h2>
               <p className="helperText">Manage booking incidents, resolve collisions, and cancel invalid reservations.</p>
             </div>
+            <span className="consoleBadge consoleBadgeModerator">Moderation Queue</span>
           </div>
 
           {loadingData ? (
@@ -132,8 +161,12 @@ export default function ModeratorPage() {
                 <span className="kpiValue">{stats.total}</span>
               </article>
               <article className="kpiCard">
-                <span className="kpiLabel">Active</span>
-                <span className="kpiValue">{stats.activeBookings}</span>
+                <span className="kpiLabel">Booked</span>
+                <span className="kpiValue">{stats.bookedBookings}</span>
+              </article>
+              <article className="kpiCard">
+                <span className="kpiLabel">Completed</span>
+                <span className="kpiValue">{stats.completedBookings}</span>
               </article>
               <article className="kpiCard">
                 <span className="kpiLabel">Cancelled</span>
@@ -147,7 +180,7 @@ export default function ModeratorPage() {
           )}
         </section>
 
-        <section className="card">
+        <section className="card moderatorConsoleCard">
           <div className="sectionHeader">
             <div>
               <h3>Moderation Queue</h3>
@@ -163,10 +196,11 @@ export default function ModeratorPage() {
               <select
                 className="input"
                 value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as "ALL" | "ACTIVE" | "CANCELLED")}
+                onChange={(event) => setStatusFilter(event.target.value as "ALL" | BookingLifecycle)}
               >
-                <option value="ALL">All statuses</option>
-                <option value="ACTIVE">Active only</option>
+                <option value="ALL">All lifecycle states</option>
+                <option value="BOOKED">Booked only</option>
+                <option value="COMPLETED">Completed only</option>
                 <option value="CANCELLED">Cancelled only</option>
               </select>
             </div>
@@ -188,15 +222,23 @@ export default function ModeratorPage() {
                     <th>Window</th>
                     <th>Total</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th>Lifecycle</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredBookings.map((booking) => {
-                    const cancellable = booking.status === "ACTIVE";
+                    const lifecycle = getBookingLifecycleStatus(booking);
+                    const cancellable = lifecycle === "BOOKED";
+                    const reviewed = reviewedBookingIds.has(booking.id);
+                    const lifecycleClass = lifecycle === "BOOKED"
+                      ? "tagBooked"
+                      : lifecycle === "COMPLETED"
+                        ? "tagCompleted"
+                        : "tagCancelled";
 
                     return (
-                      <tr key={booking.id}>
+                      <tr key={booking.id} className={reviewed ? "rowReviewed" : ""}>
                         <td>{booking.id.slice(0, 8)}...</td>
                         <td>{booking.room?.name ?? "Room"}</td>
                         <td>
@@ -214,16 +256,29 @@ export default function ModeratorPage() {
                           </span>
                         </td>
                         <td>
-                          <button
-                            type="button"
-                            className="button buttonSecondary"
-                            disabled={!cancellable || busyBookingId === booking.id}
-                            onClick={() => {
-                              void handleCancel(booking.id);
-                            }}
-                          >
-                            {busyBookingId === booking.id ? "Cancelling..." : "Cancel"}
-                          </button>
+                          <span className={`tag ${lifecycleClass}`}>{lifecycle}</span>
+                        </td>
+                        <td>
+                          <div className="inlineActions">
+                            <button
+                              type="button"
+                              className="button buttonSecondary"
+                              disabled={!cancellable || busyBookingId === booking.id}
+                              onClick={() => {
+                                void handleCancel(booking.id);
+                              }}
+                            >
+                              {busyBookingId === booking.id ? "Cancelling..." : "Cancel"}
+                            </button>
+                            <button
+                              type="button"
+                              className="button buttonGhost"
+                              disabled={reviewed}
+                              onClick={() => handleMarkReviewed(booking.id)}
+                            >
+                              {reviewed ? "Reviewed" : "Mark Reviewed"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

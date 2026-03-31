@@ -183,20 +183,19 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\0 Mikado IT\\MeetingSlotBooking\\database\\prisma\\schema.prisma",
+    "sourceFilePath": "D:\\0 Mikado IT\\MeetingSlotBooking\\backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
     "rootEnvPath": null
   },
-  "relativePath": "../../../../database/prisma",
+  "relativePath": "../../../prisma",
   "clientVersion": "6.14.0",
   "engineVersion": "717184b7b35ea05dfa71a3236b7af656013e1e49",
   "datasourceNames": [
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -205,8 +204,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../../backend/src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  MODERATOR\n  USER\n}\n\nenum BookingStatus {\n  ACTIVE\n  CANCELLED\n}\n\nmodel User {\n  id            String         @id @default(uuid())\n  name          String\n  email         String         @unique\n  passwordHash  String\n  role          Role           @default(USER)\n  bookings      Booking[]\n  refreshTokens RefreshToken[]\n  createdAt     DateTime       @default(now())\n  updatedAt     DateTime       @updatedAt\n\n  @@index([role])\n}\n\nmodel Room {\n  id         String    @id @default(uuid())\n  name       String\n  capacity   Int\n  features   String[]\n  hourlyRate Float\n  bookings   Booking[]\n  createdAt  DateTime  @default(now())\n  updatedAt  DateTime  @updatedAt\n\n  @@index([name])\n}\n\nmodel Booking {\n  id         String        @id @default(uuid())\n  userId     String\n  roomId     String\n  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)\n  room       Room          @relation(fields: [roomId], references: [id], onDelete: Restrict)\n  startTime  DateTime\n  endTime    DateTime\n  totalPrice Float\n  status     BookingStatus @default(ACTIVE)\n  createdAt  DateTime      @default(now())\n  updatedAt  DateTime      @updatedAt\n\n  @@index([roomId, startTime, endTime])\n  @@index([userId, startTime])\n  @@index([status])\n}\n\nmodel RefreshToken {\n  id        String   @id @default(uuid())\n  token     String   @unique\n  userId    String\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n\n  @@index([userId])\n  @@index([expiresAt])\n}\n",
-  "inlineSchemaHash": "1be875144590ed64ada22042d58e0fa1bdd37924748c2a05477e379dcc48b40a",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum Role {\n  ADMIN\n  MODERATOR\n  USER\n}\n\nenum BookingStatus {\n  ACTIVE\n  CANCELLED\n}\n\nmodel User {\n  id            String         @id @default(uuid())\n  name          String\n  email         String         @unique\n  passwordHash  String\n  role          Role           @default(USER)\n  bookings      Booking[]\n  refreshTokens RefreshToken[]\n  createdAt     DateTime       @default(now())\n  updatedAt     DateTime       @updatedAt\n\n  @@index([role])\n}\n\nmodel Room {\n  id         String    @id @default(uuid())\n  name       String\n  capacity   Int\n  features   String[]\n  hourlyRate Float\n  bookings   Booking[]\n  createdAt  DateTime  @default(now())\n  updatedAt  DateTime  @updatedAt\n\n  @@index([name])\n}\n\nmodel Booking {\n  id         String        @id @default(uuid())\n  userId     String\n  roomId     String\n  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)\n  room       Room          @relation(fields: [roomId], references: [id], onDelete: Restrict)\n  startTime  DateTime\n  endTime    DateTime\n  totalPrice Float\n  status     BookingStatus @default(ACTIVE)\n  createdAt  DateTime      @default(now())\n  updatedAt  DateTime      @updatedAt\n\n  @@index([roomId, startTime, endTime])\n  @@index([userId, startTime])\n  @@index([status])\n}\n\nmodel RefreshToken {\n  id        String   @id @default(uuid())\n  token     String   @unique\n  userId    String\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n\n  @@index([userId])\n  @@index([expiresAt])\n}\n",
+  "inlineSchemaHash": "52e1ef23904b3195087993ff3c92cec7dc1f6e9032954475d706cff3f4849f04",
   "copyEngine": true
 }
 config.dirname = '/'
