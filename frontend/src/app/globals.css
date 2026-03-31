@@ -2,19 +2,20 @@
 
 :root {
   color-scheme: light;
-  --bg: #ecf1f7;
+  --bg: #edf2f8;
   --panel: #ffffff;
-  --panel-soft: #f5f8fb;
-  --text: #12233f;
-  --muted: #57657c;
-  --line: #d4deea;
-  --accent: #0b7a6b;
-  --accent-strong: #08594f;
-  --accent-soft: #d7f4ee;
+  --panel-soft: #f3f8ff;
+  --text: #10213b;
+  --muted: #526177;
+  --line: #cfdaea;
+  --accent: #076c5e;
+  --accent-strong: #054f45;
+  --accent-soft: #d3f3ec;
   --warn: #a85708;
   --danger: #a72525;
   --ok: #1d6b3a;
-  --shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
+  --shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+  --shadow-soft: 0 8px 22px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -31,8 +32,15 @@ body {
   font-family: "Manrope", "Trebuchet MS", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(1100px 520px at -10% -5%, #cfe6ff 0%, transparent 60%),
-    radial-gradient(900px 460px at 110% 0%, #d9f8ef 0%, transparent 62%),
+    radial-gradient(1100px 520px at -10% -5%, #c9e3ff 0%, transparent 60%),
+    radial-gradient(900px 460px at 110% 0%, #cef7ea 0%, transparent 62%),
+    repeating-linear-gradient(
+      -24deg,
+      rgba(255, 255, 255, 0.35) 0,
+      rgba(255, 255, 255, 0.35) 3px,
+      transparent 3px,
+      transparent 32px
+    ),
     linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
 }
 
@@ -57,7 +65,7 @@ a {
 main {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 22px;
 }
 
 .appShell {
@@ -66,17 +74,20 @@ main {
 }
 
 .topBar {
+  position: sticky;
+  top: 10px;
+  z-index: 30;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 14px 16px;
+  border-radius: 20px;
+  padding: 14px 18px;
   background: rgba(255, 255, 255, 0.86);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
 .brandWrap {
@@ -113,10 +124,10 @@ main {
 .navLink {
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 8px 13px;
   font-weight: 700;
   color: #1c2d49;
-  transition: all 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .navLink:hover {
@@ -125,9 +136,10 @@ main {
 }
 
 .navLinkActive {
-  border-color: #10213a;
-  background: #10213a;
+  border-color: #0f2340;
+  background: linear-gradient(140deg, #10213a 0%, #173357 100%);
   color: #fff;
+  box-shadow: 0 8px 18px rgba(15, 35, 64, 0.24);
 }
 
 .authToolbar {
@@ -155,9 +167,9 @@ main {
   position: relative;
   overflow: hidden;
   border: 1px solid #c5d7eb;
-  border-radius: 22px;
-  padding: 28px;
-  background: linear-gradient(120deg, #ffffff 0%, #f4fbff 46%, #edfef8 100%);
+  border-radius: 24px;
+  padding: 30px;
+  background: linear-gradient(120deg, #ffffff 0%, #f3fbff 42%, #ebfef7 100%);
   box-shadow: var(--shadow);
 }
 
@@ -183,7 +195,7 @@ main {
 }
 
 .heroActions {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -191,10 +203,16 @@ main {
 
 .card {
   border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
+  border-radius: 18px;
+  padding: 20px;
   background: var(--panel);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .stack {
@@ -219,7 +237,7 @@ main {
 .kpiCard {
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 12px;
+  padding: 14px;
   background: var(--panel-soft);
 }
 
@@ -248,7 +266,7 @@ main {
 .featureCard {
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 14px;
+  padding: 15px;
   background: var(--panel-soft);
 }
 
@@ -278,16 +296,19 @@ main {
 .input {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 11px;
+  border-radius: 12px;
+  padding: 11px 12px;
   font-size: 14px;
   color: var(--text);
   background: #fff;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .input:focus {
-  outline: 2px solid #b7efe2;
-  border-color: #7ad1bf;
+  outline: none;
+  border-color: #76cdbb;
+  box-shadow: 0 0 0 4px rgba(123, 214, 193, 0.28);
+  transform: translateY(-1px);
 }
 
 .button {
@@ -295,18 +316,20 @@ main {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--accent);
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 12px;
+  padding: 10px 15px;
   font-weight: 700;
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(145deg, var(--accent) 0%, #0a8171 100%);
   cursor: pointer;
-  transition: all 0.18s ease;
+  box-shadow: 0 10px 20px rgba(9, 109, 95, 0.22);
+  transition: all 0.2s ease;
 }
 
 .button:hover {
   border-color: var(--accent-strong);
-  background: var(--accent-strong);
+  background: linear-gradient(145deg, var(--accent-strong) 0%, #0a685a 100%);
+  transform: translateY(-1px);
 }
 
 .button:disabled {
@@ -315,19 +338,21 @@ main {
 }
 
 .buttonSecondary {
-  border-color: #7cc9bc;
+  border-color: #6dbfae;
   color: var(--accent);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
 }
 
 .buttonSecondary:hover {
-  background: #e3f6f1;
+  background: #e0f4ef;
 }
 
 .buttonGhost {
   border: 1px solid var(--line);
   color: #173151;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
 }
 
 .buttonGhost:hover {
@@ -342,16 +367,18 @@ main {
 
 .slotButton {
   border: 1px solid #bee6dd;
-  border-radius: 9px;
+  border-radius: 10px;
   padding: 9px 7px;
   font-weight: 600;
   color: var(--text);
   background: var(--accent-soft);
   cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .slotButton:hover {
   background: #c8efe6;
+  transform: translateY(-1px);
 }
 
 .slotButtonUnavailable {
@@ -368,7 +395,7 @@ main {
   gap: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px;
+  padding: 14px;
   background: #fff;
 }
 
@@ -376,6 +403,7 @@ main {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .dataTable {
@@ -387,7 +415,7 @@ main {
 
 .dataTable th {
   border-bottom: 1px solid var(--line);
-  padding: 10px;
+  padding: 11px 10px;
   text-align: left;
   font-size: 12px;
   font-weight: 800;
@@ -440,6 +468,13 @@ main {
   color: var(--muted);
 }
 
+ol {
+  margin: 8px 0 0 20px;
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+}
+
 .emptyState {
   border: 1px dashed var(--line);
   border-radius: 12px;
@@ -477,6 +512,10 @@ main {
 
   .heroCard {
     padding: 20px;
+  }
+
+  .heroLead {
+    font-size: clamp(1.1rem, 6vw, 1.6rem);
   }
 
   .bookingRow {
