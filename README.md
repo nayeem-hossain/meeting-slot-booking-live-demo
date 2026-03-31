@@ -120,6 +120,43 @@ Use Vercel backend deployment for REST API hosting, then run the worker on a sep
 
 Deploy worker process (`npm run worker:start`) on an always-on host (Railway/Render/Fly.io/VM) with same `DATABASE_URL`/`REDIS_URL`/SMTP vars.
 
+#### Worker deployment quickstart (recommended next step)
+
+Use the template file `backend/worker.env.example` to configure the worker host.
+
+Required env vars on worker host:
+
+- `NODE_ENV=production`
+- `DATABASE_URL` (same Neon DB as backend API)
+- `REDIS_URL` (same Upstash Redis as backend API)
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+
+Option A: Render Worker (Docker)
+
+1. Create a new **Worker** service in Render from this repository.
+2. Set Root Directory to `backend`.
+3. Use Docker deployment and set Dockerfile path to `backend/Dockerfile.worker` (or `Dockerfile.worker` if root is already `backend`).
+4. Add environment variables listed above.
+5. Deploy and verify worker logs show completed/failed job events.
+
+Option B: Railway Worker (Nixpacks)
+
+1. Create a new Railway project from this repository.
+2. Set root directory to `backend`.
+3. Configure Start Command: `npm run worker:start`.
+4. Configure Build Command: `npm run prisma:generate:vercel && npm run build`.
+5. Add environment variables listed above.
+6. Deploy and verify worker logs show completed/failed job events.
+
+Post-deploy worker smoke checks:
+
+1. Create a booking from frontend.
+2. Confirm job enters `email-notifications` queue and worker logs process it.
+3. Cancel booking and confirm cancellation/reminder cleanup job processing.
+
 ### Smoke test checklist
 
 After both deployments are live, verify:

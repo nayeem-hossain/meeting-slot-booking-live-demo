@@ -4,10 +4,8 @@ Last updated: 2026-04-01
 
 Active workstream (current):
 
-- Complete backend/public-infra wiring for Vercel live demo
-- Extend admin operations from create/list to full CRUD as backend endpoints mature
-- Verify DB migration execution in production runtime
-- Split API hosting vs worker hosting for non-local production deployment
+- Complete worker hosting for production notifications
+- Finalize SMTP-backed delivery path and worker runtime verification
 
 ## Phase 1 - Setup Express server and PostgreSQL schema
 
@@ -99,9 +97,12 @@ Completed:
 - Worker completion/failure observability logs
 - Dead-letter queue capture for jobs that exhaust retry attempts
 - Admin queue health monitoring endpoint (`GET /api/ops/queues`)
+- Worker production deployment blueprint added (`backend/worker.env.example`, `backend/Dockerfile.worker`, README provider runbook)
 
 Pending:
 
+- Deploy worker on always-on public host (Render/Railway/Fly/VM)
+- Set SMTP production credentials on worker host and verify live email delivery
 - Email template improvement and delivery observability
 
 ## Phase 6 - Vercel live demo deployment
