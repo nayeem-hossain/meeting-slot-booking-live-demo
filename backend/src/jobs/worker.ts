@@ -1,13 +1,14 @@
 import { Job, Worker } from "bullmq";
 import { Redis } from "ioredis";
 import { env } from "../config/env.js";
+import { EmailJobPayload, enqueueDeadLetterEmailJob } from "./queue.js";
 import { sendBookingEmail } from "../services/emailService.js";
 
 const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
 
 const worker = new Worker(
   "email-notifications",
-  async (job: Job<{ to: string; bookingId: string; startTime?: string }>) => {
+  async (job: Job<EmailJobPayload>) => {
     if (job.name === "booking-confirmation") {
       await sendBookingEmail(
         job.data.to,
@@ -48,6 +49,28 @@ worker.on("completed", (job) => {
 });
 
 worker.on("failed", (job, error) => {
+  const attempts = job?.attemptsMade ?? 0;
+  const maxAttempts = Number(job?.opts?.attempts ?? 1);
+
   // eslint-disable-next-line no-console
-  console.error(`[worker] failed job ${job?.name} (${job?.id}): ${error.message}`);
+  console.error(`[worker] failed job ${job?.name} (${job?.id}) attempt ${attempts}/${maxAttempts}: ${error.message}`);
+
+  if (!job || !job.name || attempts < maxAttempts) {
+    return;
+  }
+
+  if (job.name === "booking-confirmation"
+    || job.name === "booking-cancellation"
+    || job.name === "booking-reminder-24h"
+    || job.name === "booking-reminder-1h") {
+    void enqueueDeadLetterEmailJob({
+      jobName: job.name,
+      payload: job.data,
+      failedReason: error.message,
+      attemptsMade: attempts
+    }).catch((deadLetterError) => {
+      // eslint-disable-next-line no-console
+      console.error(`[worker] failed to enqueue dead-letter record for job ${job.id}: ${deadLetterError.message}`);
+    });
+  }
 });

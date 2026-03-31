@@ -5,17 +5,26 @@ import { env } from "../config/env.js";
 const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null });
 
 export const emailQueue = new Queue("email-notifications", { connection });
+export const emailDeadLetterQueue = new Queue("email-notifications-dead-letter", { connection });
 
-type EmailJobName =
+export type EmailJobName =
   | "booking-confirmation"
   | "booking-cancellation"
   | "booking-reminder-24h"
   | "booking-reminder-1h";
 
-interface EmailJobPayload {
+export interface EmailJobPayload {
   to: string;
   bookingId: string;
   startTime?: string;
+}
+
+interface DeadLetterEmailPayload {
+  jobName: EmailJobName;
+  originalPayload: EmailJobPayload;
+  failedReason: string;
+  attemptsMade: number;
+  failedAt: string;
 }
 
 interface EnqueueOptions {
@@ -79,4 +88,39 @@ export async function cancelBookingReminders(bookingId: string): Promise<void> {
       await job.remove();
     }
   }
+}
+
+export async function enqueueDeadLetterEmailJob(input: {
+  jobName: EmailJobName;
+  payload: EmailJobPayload;
+  failedReason: string;
+  attemptsMade: number;
+}): Promise<void> {
+  const deadLetterPayload: DeadLetterEmailPayload = {
+    jobName: input.jobName,
+    originalPayload: input.payload,
+    failedReason: input.failedReason,
+    attemptsMade: input.attemptsMade,
+    failedAt: new Date().toISOString()
+  };
+
+  await emailDeadLetterQueue.add("email-dead-letter", deadLetterPayload, {
+    removeOnComplete: false,
+    removeOnFail: false
+  });
+}
+
+export async function getQueueHealthSnapshot(): Promise<{
+  email: Record<string, number>;
+  deadLetter: Record<string, number>;
+}> {
+  const [emailCounts, deadLetterCounts] = await Promise.all([
+    emailQueue.getJobCounts("waiting", "active", "completed", "failed", "delayed"),
+    emailDeadLetterQueue.getJobCounts("waiting", "active", "completed", "failed", "delayed")
+  ]);
+
+  return {
+    email: emailCounts,
+    deadLetter: deadLetterCounts
+  };
 }

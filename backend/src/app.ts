@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { isAllowedOrigin } from "./config/env.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { bookingRouter } from "./routes/bookings.routes.js";
+import { opsRouter } from "./routes/ops.routes.js";
 import { roomRouter } from "./routes/rooms.routes.js";
 
 export const app = express();
@@ -33,6 +34,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/bookings", bookingRouter);
+app.use("/api/ops", opsRouter);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof ZodError) {

@@ -57,6 +57,7 @@ cd frontend
 - `GET /api/bookings/availability?roomId=<id>&date=YYYY-MM-DD`
 - `POST /api/bookings`
 - `PATCH /api/bookings/:id/cancel`
+- `GET /api/ops/queues` (Admin)
 
 ## Implemented logic
 
@@ -66,6 +67,8 @@ cd frontend
 - role model: `ADMIN`, `MODERATOR`, `USER`
 - auth endpoint rate limiting (register/login/refresh/logout)
 - refresh-token reuse detection with token-family revocation
+- dead-letter capture for exhausted email worker jobs
+- admin queue health snapshot endpoint for worker monitoring
 
 ## Next implementation targets
 
