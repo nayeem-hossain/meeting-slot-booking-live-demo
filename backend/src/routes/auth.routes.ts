@@ -1,6 +1,5 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import { Role } from "../generated/prisma/index.js";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { prisma } from "../db/prisma.js";
@@ -55,7 +54,7 @@ authRouter.post("/register", registerLimiter, async (req, res, next) => {
         name: payload.name,
         email: payload.email,
         passwordHash,
-        role: Role.USER
+        role: "USER"
       }
     });
 

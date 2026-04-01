@@ -8,3 +8,4 @@ coverage/
 *.log
 .tools/
 phase-status.md
+creds.txt

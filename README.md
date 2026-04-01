@@ -84,7 +84,7 @@ cd frontend
 2. Set the project root to `frontend`.
 3. Configure env var:
 
-	- `NEXT_PUBLIC_API_BASE_URL=https://<your-backend-domain>`
+   - `NEXT_PUBLIC_API_BASE_URL=https://<your-backend-domain>`
 
 4. Trigger deployment and verify the Vercel URL loads.
 
@@ -113,8 +113,8 @@ Use Vercel backend deployment for REST API hosting, then run the worker on a sep
 - `JWT_REFRESH_SECRET=<secure-random-secret>`
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (optional for demo mode)
 
-4. Deploy backend and copy live backend URL.
-5. In frontend Vercel project, set `NEXT_PUBLIC_API_BASE_URL` to backend live URL and redeploy.
+1. Deploy backend and copy live backend URL.
+2. In frontend Vercel project, set `NEXT_PUBLIC_API_BASE_URL` to backend live URL and redeploy.
 
 ### Worker host (separate from Vercel Functions)
 

@@ -9,15 +9,39 @@ interface RefreshTokenPayload {
   type: "refresh";
 }
 
+const signJwt = jwt.sign as unknown as (
+  payload: object,
+  secret: string,
+  options: { expiresIn: number }
+) => string;
+
+function parseDurationToSeconds(raw: string): number {
+  const match = raw.trim().match(/^(\d+)([smhd])$/i);
+  if (!match) {
+    throw new Error(`Invalid JWT duration format: ${raw}. Use formats like 15m, 7d, 12h.`);
+  }
+
+  const value = Number(match[1]);
+  const unit = match[2].toLowerCase();
+
+  const factor = unit === "s"
+    ? 1
+    : unit === "m"
+      ? 60
+      : unit === "h"
+        ? 3600
+        : 86400;
+
+  return value * factor;
+}
+
 export function signAccessToken(user: AuthUser): string {
-  const expiresIn = env.JWT_ACCESS_EXPIRES_IN as jwt.SignOptions["expiresIn"];
-  return jwt.sign(user, env.JWT_ACCESS_SECRET, {
-    expiresIn
+  return signJwt(user, env.JWT_ACCESS_SECRET, {
+    expiresIn: parseDurationToSeconds(env.JWT_ACCESS_EXPIRES_IN)
   });
 }
 
 export function signRefreshToken(user: AuthUser): string {
-  const expiresIn = env.JWT_REFRESH_EXPIRES_IN as jwt.SignOptions["expiresIn"];
   const payload: RefreshTokenPayload = {
     sub: user.id,
     email: user.email,
@@ -25,7 +49,9 @@ export function signRefreshToken(user: AuthUser): string {
     type: "refresh"
   };
 
-  return jwt.sign(payload, env.JWT_REFRESH_SECRET, { expiresIn });
+  return signJwt(payload, env.JWT_REFRESH_SECRET, {
+    expiresIn: parseDurationToSeconds(env.JWT_REFRESH_EXPIRES_IN)
+  });
 }
 
 export function verifyRefreshToken(token: string): RefreshTokenPayload {
